@@ -25,6 +25,20 @@ export class CreateGraphService {
         if (teams[k].name != teams[i].name) {
           graph.addEdge(teams[k].name, teams[i].name);
           graph.addEdge(teams[i].name, teams[k].name);
+
+          await this.prismaService.clashes.create({
+            data: {
+              homeTeamId: teams[k].name,
+              awayTeamId: teams[i].name,
+            },
+          });
+
+          await this.prismaService.clashes.create({
+            data: {
+              homeTeamId: teams[i].name,
+              awayTeamId: teams[k].name,
+            },
+          });
         }
 
         //fazer com que o grafo ande um time pra frente
@@ -41,6 +55,20 @@ export class CreateGraphService {
               !graph.hasEdge(teams[k].name, teams[m].name)
             ) {
               graph.addEdge(teams[k].name, teams[m].name);
+
+              await this.prismaService.clashes.create({
+                data: {
+                  homeTeamId: teams[k].name,
+                  awayTeamId: teams[m].name,
+                },
+              });
+
+              await this.prismaService.clashes.create({
+                data: {
+                  homeTeamId: teams[m].name,
+                  awayTeamId: teams[k].name,
+                },
+              });
             }
           }
         }
