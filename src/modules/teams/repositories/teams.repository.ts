@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../shared/database/prisma.service';
-import { CrudTeamsInterface } from '../implementations/crud-teams.interface';
+import { CrudTeamsInterface } from '../contracts/crud-teams.interface';
 import { Team } from '@prisma/client';
 import { CreateTeamDTO } from '../dtos/create-team.dto';
 

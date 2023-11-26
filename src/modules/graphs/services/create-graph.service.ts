@@ -1,17 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Graph } from 'graph-data-structure';
 import { PrismaService } from '../../../shared/database/prisma.service';
+import { Graphs } from '@prisma/client';
 
 @Injectable()
 export class CreateGraphService {
   constructor(private prismaService: PrismaService) {}
 
-  async execute(): Promise<any> {
+  async execute(): Promise<Graphs> {
     const graph = Graph();
 
     const teams = await this.prismaService.team.findMany();
 
-    if (teams.length < 2) return new BadRequestException('Insuficient teams');
+    if (teams.length < 2) throw new BadRequestException('Insuficient teams');
 
     teams.forEach((team) => {
       graph.addNode(team.name);

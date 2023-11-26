@@ -7,4 +7,4 @@ import { GraphsController } from './controllers/graphs.controller';
   controllers: [GraphsController],
   providers: [PrismaService, CreateGraphService],
 })
-export class GraphModule {}
+export class GraphsModule {}
