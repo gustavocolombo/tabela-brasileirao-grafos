@@ -46,6 +46,16 @@ export class ClashesRepository implements CrudClashesInterface {
     graph.removeEdge(recoverClash.homeTeamId, recoverClash.awayTeamId);
     graph.removeEdge(recoverClash.awayTeamId, recoverClash.homeTeamId);
 
+    //to-do update graph database, remove target and source
+    await this.prismaService.graphs.update({
+      data: {
+        links: graph.serialize().links,
+      },
+      where: {
+        id: graphId,
+      },
+    });
+
     const clashDeleted = await this.prismaService.clashes.delete({
       where: {
         id,
