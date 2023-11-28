@@ -16,12 +16,39 @@ export class TeamsRepository implements CrudTeamsInterface {
 
     return teamCreated;
   }
+
+  async getByVictories(): Promise<Partial<Team>[]> {
+    return await this.prismaService.team.findMany({
+      orderBy: [
+        { victories: 'desc' },
+        { defeats: 'desc' },
+        { draws: 'desc' },
+        { proGoals: 'desc' },
+        { ownGoals: 'desc' },
+        { redCards: 'desc' },
+        { yellowCards: 'desc' },
+      ],
+      select: {
+        name: true,
+        victories: true,
+        defeats: true,
+        draws: true,
+        proGoals: true,
+        ownGoals: true,
+        redCards: true,
+        yellowCards: true,
+      },
+    });
+  }
+
   get(): Promise<Team> {
     throw new Error('Method not implemented.');
   }
+
   update(): Promise<Team> {
     throw new Error('Method not implemented.');
   }
+
   disqualify(): Promise<Team> {
     throw new Error('Method not implemented.');
   }
