@@ -17,7 +17,7 @@ export class TeamsController {
   }
 
   @Get()
-  async getClassification(): Promise<Team[]> {
+  async getClassification(): Promise<any> {
     return await this.showClassService.execute();
   }
 }

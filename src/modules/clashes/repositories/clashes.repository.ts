@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CrudClashesInterface } from '../contracts/crud-clashes.interface';
-import { Clashes } from '@prisma/client';
+import { Clashes, Team } from '@prisma/client';
 import { PrismaService } from '../../../shared/database/prisma.service';
 import Graph, { Serialized } from 'graph-data-structure';
 
@@ -27,8 +27,20 @@ export class ClashesRepository implements CrudClashesInterface {
     return await this.prismaService.clashes.findMany();
   }
 
-  update(): Promise<{ id: number; homeTeamId: string; awayTeamId: string }> {
-    throw new Error('Method not implemented.');
+  async update(
+    id: number,
+    winnerId: number,
+    loserId: number,
+  ): Promise<Clashes> {
+    const clashUpdated = await this.prismaService.clashes.update({
+      where: { id },
+      data: {
+        winnerTeamId: winnerId,
+        loserTeamId: loserId,
+      },
+    });
+
+    return clashUpdated;
   }
 
   async delete(id: number, graphId: number): Promise<Clashes> {

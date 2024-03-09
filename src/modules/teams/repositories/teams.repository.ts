@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../shared/database/prisma.service';
-import { CrudTeamsInterface } from '../contracts/crud-teams.interface';
+import { TeamsInterface } from '../contracts/teams.interface';
 import { Team } from '@prisma/client';
 import { CreateTeamDTO } from '../dtos/create-team.dto';
 
 @Injectable()
-export class TeamsRepository implements CrudTeamsInterface {
+export class TeamsRepository implements TeamsInterface {
   constructor(private prismaService: PrismaService) {}
+
   async create(team: CreateTeamDTO): Promise<Team> {
     const teamCreated = await this.prismaService.team.create({
       data: {
@@ -17,9 +18,27 @@ export class TeamsRepository implements CrudTeamsInterface {
     return teamCreated;
   }
 
-  async getByVictories(): Promise<Partial<Team>[]> {
+  async get(teamId: number): Promise<Team> {
+    return this.prismaService.team.findUnique({ where: { id: teamId } });
+  }
+
+  async updatePositionTeam(
+    teamId: number,
+    numberPosition: number,
+  ): Promise<Team> {
+    return await this.prismaService.team.update({
+      where: { id: teamId },
+      data: {
+        position: numberPosition,
+      },
+    });
+  }
+
+  async orderDataTeams(): Promise<Partial<Team>[]> {
     return await this.prismaService.team.findMany({
       orderBy: [
+        { points: 'desc' },
+        { position: 'desc' },
         { victories: 'desc' },
         { defeats: 'desc' },
         { draws: 'desc' },
@@ -29,7 +48,10 @@ export class TeamsRepository implements CrudTeamsInterface {
         { yellowCards: 'desc' },
       ],
       select: {
+        id: true,
         name: true,
+        points: true,
+        position: true,
         victories: true,
         defeats: true,
         draws: true,
@@ -41,15 +63,24 @@ export class TeamsRepository implements CrudTeamsInterface {
     });
   }
 
-  get(): Promise<Team> {
-    throw new Error('Method not implemented.');
-  }
-
-  update(): Promise<Team> {
-    throw new Error('Method not implemented.');
-  }
-
-  disqualify(): Promise<Team> {
-    throw new Error('Method not implemented.');
+  async orderByName(): Promise<any> {
+    return await this.prismaService.team.groupBy({
+      by: [
+        'id',
+        'name',
+        'points',
+        'position',
+        'victories',
+        'defeats',
+        'draws',
+        'proGoals',
+        'ownGoals',
+        'redCards',
+        'yellowCards',
+      ],
+      orderBy: {
+        name: 'asc',
+      },
+    });
   }
 }
