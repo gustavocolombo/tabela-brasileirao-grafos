@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../shared/database/prisma.service';
 import { TeamsInterface } from '../contracts/teams.interface';
-import { Team } from '@prisma/client';
+import { Prisma, Team } from '@prisma/client';
 import { CreateTeamDTO } from '../dtos/create-team.dto';
 
 @Injectable()
@@ -20,6 +20,15 @@ export class TeamsRepository implements TeamsInterface {
 
   async get(teamId: number): Promise<Team> {
     return this.prismaService.team.findUnique({ where: { id: teamId } });
+  }
+
+  async updateTeam({ ...rest }: Team): Promise<Team> {
+    return await this.prismaService.team.update({
+      where: { id: rest.id },
+      data: {
+        ...rest,
+      },
+    });
   }
 
   async updatePositionTeam(
