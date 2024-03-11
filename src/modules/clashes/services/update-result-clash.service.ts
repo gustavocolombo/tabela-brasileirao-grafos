@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ClashesRepository } from '../repositories/clashes.repository';
 import { ResultClashDTO } from '../dtos/result-clash.dto';
 import { TeamsRepository } from '../../teams/repositories/teams.repository';
+import { Clashes } from '@prisma/client';
 
 @Injectable()
 export class UpdateResultClashService {
@@ -29,36 +30,84 @@ export class UpdateResultClashService {
       throw new BadRequestException('Error at search clash, try again');
     }
 
-    const updatedClash = await this.clashRepository.update(
-      clash.value.id,
-      winner.value.id,
-      loser.value.id,
-    );
-
+    let updatedClash: Clashes;
     const result = winnerGoals - loserGoals;
 
-    winner.value.proGoals = winnerGoals;
-    winner.value.ownGoals = loserGoals;
+    const validatedTeams = await this.clashRepository.validateIfTeamIsInClash(
+      clashId,
+      winner.value.name,
+      loser.value.name,
+    );
 
-    loser.value.proGoals = loserGoals;
-    loser.value.ownGoals = winnerGoals;
+    if (!validatedTeams) {
+      throw new BadRequestException(
+        'Teams are not compatible with this clash, try again',
+      );
+    }
 
-    winner.value.goalsDifference += result;
-    loser.value.goalsDifference -= result;
+    if (result > 0) {
+      updatedClash = await this.clashRepository.update(
+        clash.value.id,
+        winner.value.id,
+        loser.value.id,
+        false,
+      );
 
-    winner.value.victories++;
-    loser.value.defeats++;
+      winner.value.proGoals = winnerGoals;
+      winner.value.ownGoals = loserGoals;
 
-    winner.value.points += 3;
+      loser.value.proGoals = loserGoals;
+      loser.value.ownGoals = winnerGoals;
 
-    const updateWinner = await this.teamsRepository.updateTeam({
-      ...winner.value,
-    });
+      winner.value.goalsDifference += result;
+      loser.value.goalsDifference -= result;
 
-    const updateLoser = await this.teamsRepository.updateTeam({
-      ...loser.value,
-    });
+      winner.value.victories++;
+      loser.value.defeats++;
 
-    //call show classification
+      winner.value.points += 3;
+
+      const updateWinner = await this.teamsRepository.updateTeam({
+        ...winner.value,
+      });
+
+      const updateLoser = await this.teamsRepository.updateTeam({
+        ...loser.value,
+      });
+
+      return updatedClash;
+    } else {
+      updatedClash = await this.clashRepository.update(
+        clash.value.id,
+        null,
+        null,
+        true,
+      );
+
+      const teamOne = winner.value;
+      const teamTwo = loser.value;
+
+      teamOne.draws++;
+      teamTwo.draws++;
+
+      teamOne.proGoals += winnerGoals;
+      teamOne.ownGoals += loserGoals;
+
+      teamTwo.proGoals += loserGoals;
+      teamTwo.ownGoals += winnerGoals;
+
+      teamOne.points += 1;
+      teamTwo.points += 1;
+
+      const updateTeamOne = await this.teamsRepository.updateTeam({
+        ...teamOne,
+      });
+
+      const updateTeamTwo = await this.teamsRepository.updateTeam({
+        ...teamTwo,
+      });
+
+      return updatedClash;
+    }
   }
 }

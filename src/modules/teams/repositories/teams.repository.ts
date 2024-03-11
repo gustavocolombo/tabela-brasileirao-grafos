@@ -46,15 +46,12 @@ export class TeamsRepository implements TeamsInterface {
   async orderDataTeams(): Promise<Partial<Team>[]> {
     return await this.prismaService.team.findMany({
       orderBy: [
-        { points: 'desc' },
-        { position: 'desc' },
-        { victories: 'desc' },
-        { defeats: 'desc' },
-        { draws: 'desc' },
-        { proGoals: 'desc' },
-        { ownGoals: 'desc' },
-        { redCards: 'desc' },
-        { yellowCards: 'desc' },
+        { position: 'desc' } && { points: 'desc' },
+        { victories: 'desc' } && { defeats: 'desc' } && { draws: 'desc' } && {
+            proGoals: 'desc',
+          } && { ownGoals: 'desc' } && { redCards: 'desc' } && {
+            yellowCards: 'desc',
+          },
       ],
       select: {
         id: true,

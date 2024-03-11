@@ -28,6 +28,8 @@ export class ShowClassificationService {
         }
 
         return teamsSorted;
+      } else {
+        return await this.teamsRepository.orderDataTeams();
       }
     }
 

@@ -54,6 +54,8 @@ model Clashes {
   winnerTeamId Int?
   loserTeamId  Int?
 
+  isDraw Boolean? @default(true)
+
   @@map("clashes")
 }
 
