@@ -1,17 +1,22 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Graph } from 'graph-data-structure';
 import { PrismaService } from '../../../shared/database/prisma.service';
+import { Graphs } from '@prisma/client';
+import { CreateClashService } from '../../clashes/services/create-clash.service';
 
 @Injectable()
 export class CreateGraphService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private createClashService: CreateClashService,
+  ) {}
 
-  async execute(): Promise<any> {
+  async execute(): Promise<Graphs> {
     const graph = Graph();
 
     const teams = await this.prismaService.team.findMany();
 
-    if (teams.length < 2) return new BadRequestException('Insuficient teams');
+    if (teams.length < 2) throw new BadRequestException('Insuficient teams');
 
     teams.forEach((team) => {
       graph.addNode(team.name);
@@ -25,6 +30,9 @@ export class CreateGraphService {
         if (teams[k].name != teams[i].name) {
           graph.addEdge(teams[k].name, teams[i].name);
           graph.addEdge(teams[i].name, teams[k].name);
+
+          await this.createClashService.execute(teams[k].name, teams[i].name);
+          await this.createClashService.execute(teams[i].name, teams[k].name);
         }
 
         //fazer com que o grafo ande um time pra frente
@@ -41,6 +49,15 @@ export class CreateGraphService {
               !graph.hasEdge(teams[k].name, teams[m].name)
             ) {
               graph.addEdge(teams[k].name, teams[m].name);
+
+              await this.createClashService.execute(
+                teams[k].name,
+                teams[m].name,
+              );
+              await this.createClashService.execute(
+                teams[m].name,
+                teams[k].name,
+              );
             }
           }
         }

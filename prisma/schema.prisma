@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -22,13 +23,19 @@ model Team {
   draws     Int @default(0)
   defeats   Int @default(0)
 
-  proGoals    Int @default(0)
-  ownGoals    Int @default(0)
-  redCards    Int @default(0)
-  yellowCards Int @default(0)
+  proGoals        Int @default(0)
+  ownGoals        Int @default(0)
+  redCards        Int @default(0)
+  yellowCards     Int @default(0)
+  goalsDifference Int @default(0)
 
-  chashesHome Clashes[] @relation("homeTeamClash")
-  chashesAway Clashes[] @relation("awayTeamClash")
+  points   Int  @default(0)
+  position Int?
+
+  chashesHome   Clashes[] @relation("homeTeamClash")
+  chashesAway   Clashes[] @relation("awayTeamClash")
+  clashWinnerId Clashes[] @relation("winnerTeam")
+  clashLoserId  Clashes[] @relation("loserTeam")
 
   @@map("team")
 }
@@ -41,6 +48,13 @@ model Clashes {
 
   awayTeam   Team?   @relation("awayTeamClash", fields: [awayTeamId], references: [name])
   awayTeamId String?
+
+  winner       Team? @relation("winnerTeam", fields: [winnerTeamId], references: [id])
+  loser        Team? @relation("loserTeam", fields: [loserTeamId], references: [id])
+  winnerTeamId Int?
+  loserTeamId  Int?
+
+  isDraw Boolean? @default(true)
 
   @@map("clashes")
 }
