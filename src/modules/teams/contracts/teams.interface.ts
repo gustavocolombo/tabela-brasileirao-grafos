@@ -7,4 +7,5 @@ export interface TeamsInterface {
   orderDataTeams(): Promise<Partial<Team>[]>;
   orderByName(): Promise<any>;
   updatePositionTeam(numberPosition: number, teamId: number): Promise<Team>;
+  updateTeam(team: Team): Promise<Team>;
 }

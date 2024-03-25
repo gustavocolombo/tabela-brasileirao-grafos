@@ -31,12 +31,14 @@ export class ClashesRepository implements CrudClashesInterface {
     id: number,
     winnerId: number,
     loserId: number,
+    isDraw?: boolean,
   ): Promise<Clashes> {
     const clashUpdated = await this.prismaService.clashes.update({
       where: { id },
       data: {
         winnerTeamId: winnerId,
         loserTeamId: loserId,
+        isDraw,
       },
     });
 
@@ -75,5 +77,27 @@ export class ClashesRepository implements CrudClashesInterface {
     });
 
     return clashDeleted;
+  }
+
+  async validateIfTeamIsInClash(
+    clashId: number,
+    firstTeamName: string,
+    secondTeamName: string,
+  ): Promise<boolean> {
+    const search = await this.prismaService.clashes.findUnique({
+      where: {
+        id: clashId,
+        AND: {
+          homeTeamId: {
+            contains: firstTeamName,
+          },
+          awayTeamId: {
+            contains: secondTeamName,
+          },
+        },
+      },
+    });
+
+    return true ? search !== null : false;
   }
 }

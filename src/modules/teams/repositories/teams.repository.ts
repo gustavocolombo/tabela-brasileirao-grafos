@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../shared/database/prisma.service';
 import { TeamsInterface } from '../contracts/teams.interface';
-import { Team } from '@prisma/client';
+import { Prisma, Team } from '@prisma/client';
 import { CreateTeamDTO } from '../dtos/create-team.dto';
 
 @Injectable()
@@ -22,6 +22,15 @@ export class TeamsRepository implements TeamsInterface {
     return this.prismaService.team.findUnique({ where: { id: teamId } });
   }
 
+  async updateTeam({ ...rest }: Team): Promise<Team> {
+    return await this.prismaService.team.update({
+      where: { id: rest.id },
+      data: {
+        ...rest,
+      },
+    });
+  }
+
   async updatePositionTeam(
     teamId: number,
     numberPosition: number,
@@ -37,15 +46,12 @@ export class TeamsRepository implements TeamsInterface {
   async orderDataTeams(): Promise<Partial<Team>[]> {
     return await this.prismaService.team.findMany({
       orderBy: [
-        { points: 'desc' },
-        { position: 'desc' },
-        { victories: 'desc' },
-        { defeats: 'desc' },
-        { draws: 'desc' },
-        { proGoals: 'desc' },
-        { ownGoals: 'desc' },
-        { redCards: 'desc' },
-        { yellowCards: 'desc' },
+        { position: 'desc' } && { points: 'desc' },
+        { victories: 'desc' } && { defeats: 'desc' } && { draws: 'desc' } && {
+            proGoals: 'desc',
+          } && { ownGoals: 'desc' } && { redCards: 'desc' } && {
+            yellowCards: 'desc',
+          },
       ],
       select: {
         id: true,

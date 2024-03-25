@@ -28,6 +28,25 @@ export class ShowClassificationService {
         }
 
         return teamsSorted;
+      } else {
+        const teamsWithDifferentPoints =
+          await this.teamsRepository.orderDataTeams();
+
+        for (let k in teamsWithDifferentPoints) {
+          let finalPosition = teamsWithDifferentPoints.findIndex(
+            (teamSorted) => teamSorted.id == teamsWithDifferentPoints[k].id,
+          );
+
+          //make array position starts in 1 and not 0
+          finalPosition += 1;
+
+          await this.teamsRepository.updatePositionTeam(
+            teamsWithDifferentPoints[k].id,
+            finalPosition,
+          );
+        }
+
+        return await this.teamsRepository.orderDataTeams();
       }
     }
 

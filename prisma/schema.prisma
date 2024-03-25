@@ -23,10 +23,11 @@ model Team {
   draws     Int @default(0)
   defeats   Int @default(0)
 
-  proGoals    Int @default(0)
-  ownGoals    Int @default(0)
-  redCards    Int @default(0)
-  yellowCards Int @default(0)
+  proGoals        Int @default(0)
+  ownGoals        Int @default(0)
+  redCards        Int @default(0)
+  yellowCards     Int @default(0)
+  goalsDifference Int @default(0)
 
   points   Int  @default(0)
   position Int?
@@ -52,6 +53,8 @@ model Clashes {
   loser        Team? @relation("loserTeam", fields: [loserTeamId], references: [id])
   winnerTeamId Int?
   loserTeamId  Int?
+
+  isDraw Boolean? @default(true)
 
   @@map("clashes")
 }
